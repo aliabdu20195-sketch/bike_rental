@@ -1,0 +1,660 @@
+<!doctype html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="theme-color" content="#0B4F6C">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="icon" href="icon-192.png">
+<link rel="apple-touch-icon" href="icon-192.png">
+<title>تأجير الدراجات</title>
+<style>
+:root{--bg:#EDF0F2;--card:#fff;--ink:#14202B;--muted:#5E6B76;--line:#D8DEE3;--pri:#0B4F6C;--pri-ink:#fff;--ok:#1F7A4D;--okbg:#E3F3EA;--warn:#8A5A0B;--warnbg:#FBF0D9;--bad:#B3261E;--badbg:#FBE4E2;--soft:#F5F7F8}
+@media(prefers-color-scheme:dark){:root{--bg:#0E151B;--card:#16202A;--ink:#E8EEF2;--muted:#9AA8B3;--line:#27343F;--pri:#59B8DB;--pri-ink:#06222E;--ok:#5FD39A;--okbg:#12301F;--warn:#F0BE66;--warnbg:#33290F;--bad:#FF8A80;--badbg:#3A1714;--soft:#1B2732}}
+*{box-sizing:border-box}html{-webkit-text-size-adjust:100%}
+body{margin:0;background:var(--bg);color:var(--ink);font-family:'Segoe UI',Tahoma,'Noto Naskh Arabic',Arial,sans-serif;font-size:15px;line-height:1.6}
+a{color:var(--pri)}
+.hd{position:sticky;top:0;z-index:6}
+.top{background:var(--pri);color:var(--pri-ink);padding:calc(10px + env(safe-area-inset-top)) 14px 10px;font-weight:700;font-size:1.05rem;display:flex;justify-content:space-between;align-items:center}
+.top small{font-weight:400;opacity:.85}
+main{max-width:900px;margin:auto;padding:14px 14px calc(30px + env(safe-area-inset-bottom))}
+.tabs{background:var(--card);border-bottom:1px solid var(--line);display:flex;box-shadow:0 2px 6px rgba(0,0,0,.08)}
+.tabs a{flex:1;text-align:center;padding:10px 4px;text-decoration:none;color:var(--muted);font-size:.8rem;font-weight:600}
+.tabs a b{display:block;font-size:1.25rem;line-height:1.2}
+.tabs a.on{color:var(--pri)}
+.tabs a.plus b{background:var(--pri);color:var(--pri-ink);border-radius:50%;width:34px;height:34px;line-height:34px;margin:0 auto;font-size:1.5rem}
+.tabs a.on{box-shadow:inset 0 -3px 0 var(--pri)}
+h1{font-size:1.3rem;margin:6px 0 12px}h2{font-size:1.05rem;margin:20px 0 8px}
+.card{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:14px;margin-bottom:12px}
+.stats{display:grid;grid-template-columns:repeat(2,1fr);gap:10px;margin-bottom:12px}
+@media(min-width:700px){.stats{grid-template-columns:repeat(4,1fr)}}
+.stat{background:var(--card);border:1px solid var(--line);border-radius:12px;padding:10px 12px}
+.stat b{display:block;font-size:1.4rem;line-height:1.25;font-variant-numeric:tabular-nums}.stat span{color:var(--muted);font-size:.82rem}
+.stat.ok b{color:var(--ok)}.stat.warn b{color:var(--warn)}.stat.bad b{color:var(--bad)}
+.grid{display:grid;gap:12px;grid-template-columns:1fr}@media(min-width:620px){.grid{grid-template-columns:repeat(2,1fr)}}
+.rt{margin:0;border-radius:16px;border-inline-start:6px solid var(--pri)}.rt.late{border-inline-start-color:var(--bad)}
+.rt .top2{display:flex;justify-content:space-between;gap:8px;align-items:baseline}
+.who{display:flex;align-items:center;gap:10px;color:var(--muted);font-size:.92rem;margin-top:6px}
+.clock{font-size:2.1rem;font-weight:700;font-variant-numeric:tabular-nums;letter-spacing:.02em;direction:ltr;text-align:right;margin:6px 0 2px}
+.rt.late .clock{color:var(--bad)}
+.sub{display:flex;justify-content:space-between;gap:8px;flex-wrap:wrap;font-size:.92rem;margin-bottom:10px}
+.avatar{width:42px;height:42px;border-radius:50%;object-fit:cover;background:var(--soft);flex:none;display:inline-flex;align-items:center;justify-content:center;font-weight:700;color:var(--muted);border:1px solid var(--line)}
+.avatar.lg{width:130px;height:130px;border-radius:14px;font-size:2.4rem}
+.chip{display:inline-block;padding:2px 10px;border-radius:99px;font-size:.8rem;font-weight:600;background:var(--soft);color:var(--muted)}
+.chip.ok{background:var(--okbg);color:var(--ok)}.chip.warn{background:var(--warnbg);color:var(--warn)}.chip.bad{background:var(--badbg);color:var(--bad)}
+.btn{display:inline-block;border:0;cursor:pointer;background:var(--pri);color:var(--pri-ink);padding:10px 18px;border-radius:10px;font:inherit;font-weight:600;text-decoration:none;text-align:center}
+.btn.sec{background:var(--soft);color:var(--ink);border:1px solid var(--line)}.btn.bad{background:var(--bad);color:#fff}
+.btn.sm{padding:5px 12px;font-size:.85rem}.btn.block{display:block;width:100%}.btn.big{padding:14px 18px;font-size:1.1rem}
+.btn:focus-visible,input:focus-visible,select:focus-visible,a:focus-visible{outline:3px solid var(--warn);outline-offset:2px}
+label{display:block;font-weight:600;margin:10px 0 4px;font-size:.92rem}
+input,select,textarea{width:100%;padding:10px 12px;border:1px solid var(--line);border-radius:10px;background:var(--card);color:var(--ink);font:inherit}
+input[type=checkbox]{width:auto}
+.row{display:grid;gap:10px;grid-template-columns:1fr}@media(min-width:620px){.row.c2{grid-template-columns:1fr 1fr}.row.c3{grid-template-columns:repeat(3,1fr)}}
+.hint{color:var(--muted);font-size:.82rem;margin-top:3px}
+.tw{overflow-x:auto;background:var(--card);border:1px solid var(--line);border-radius:14px;margin-bottom:12px}
+table{width:100%;border-collapse:collapse;min-width:520px}
+th,td{padding:9px 12px;text-align:right;border-bottom:1px solid var(--line);white-space:nowrap}
+th{background:var(--soft);font-size:.85rem;color:var(--muted)}tr:last-child td{border-bottom:0}
+.fl{padding:10px 14px;border-radius:10px;margin-bottom:12px;font-weight:600}.fl.ok{background:var(--okbg);color:var(--ok)}.fl.err{background:var(--badbg);color:var(--bad)}.fl.warn{background:var(--warnbg);color:var(--warn)}
+.filters{display:grid;gap:8px;grid-template-columns:1fr 1fr;margin-bottom:12px}
+.kv{display:flex;justify-content:space-between;gap:10px;padding:7px 0;border-bottom:1px dashed var(--line)}.kv:last-child{border:0}.kv b{font-variant-numeric:tabular-nums}
+.big{font-size:1.5rem;font-weight:700}
+.empty{text-align:center;color:var(--muted);padding:22px 10px}
+.acts{display:flex;gap:6px;flex-wrap:wrap;align-items:center}
+.receipt{max-width:460px;margin:auto}
+.lock{max-width:340px;margin:18vh auto;text-align:center}
+.list a.item{display:flex;justify-content:space-between;align-items:center;padding:14px;border:1px solid var(--line);background:var(--card);border-radius:12px;margin-bottom:8px;text-decoration:none;color:var(--ink);font-weight:600}
+.photorow{display:flex;gap:14px;align-items:center;flex-wrap:wrap;margin:6px 0}
+.prow{display:grid;grid-template-columns:2fr 1fr auto;gap:8px;margin-bottom:6px}
+.pos{color:var(--ok)}.neg{color:var(--bad)}
+.sign{display:grid;grid-template-columns:repeat(3,1fr);gap:18px;margin-top:46px;text-align:center}.sign div{border-top:1px solid var(--ink);padding-top:6px;font-size:.9rem}
+.terms{font-size:.92rem;line-height:1.9}.contract h1{text-align:center}
+.top small .btn{padding:1px 10px;font-size:.78rem;margin-inline-start:6px}
+@media print{.top,.tabs,.noprint,.fl{display:none!important}body{background:#fff;color:#000}.card{border:0}main{padding:0}:root{--ink:#000;--muted:#333;--line:#999}}
+@media(prefers-reduced-motion:reduce){*{transition:none!important;animation:none!important}}
+</style>
+</head>
+<body>
+<div id="app"><div class="lock card"><h1>جارٍ التحميل…</h1></div></div>
+<script>
+function showBootError(e){try{var a=document.getElementById('app');if(a)a.innerHTML='<div class="lock card" style="padding:16px;text-align:center"><h1>تعذّر تشغيل التطبيق</h1><p>حدّث المتصفح (Chrome) ثم أعد المحاولة.</p><p style="direction:ltr;font-size:12px;word-break:break-all">'+String(e&&e.message||e)+'</p></div>';}catch(x){}}
+window.onerror=function(m){if(!window.__ready)showBootError(m);};
+setTimeout(function(){var a=document.getElementById('app');if(a&&a.innerText.indexOf('\u062C\u0627\u0631')>-1&&!window.__ready)showBootError('timeout');},8000);
+</script>
+<script>
+'use strict';
+function formToObj(f) { const o = {}; new FormData(f).forEach((v, k) => { o[k] = v; }); return o; }
+/* ====================== التخزين (IndexedDB مع بديل localStorage) ====================== */
+const store = (() => {
+  let db = null, mode = 'idb';
+  const LSP = 'bikerent2_';
+  const open = () => new Promise(res => {
+    try {
+      const rq = indexedDB.open('bike_rental', 1);
+      rq.onupgradeneeded = () => rq.result.createObjectStore('kv');
+      rq.onsuccess = () => { db = rq.result; res(true); };
+      rq.onerror = rq.onblocked = () => res(false);
+    } catch (e) { res(false); }
+  });
+  return {
+    async init() { if (!(await open())) mode = 'ls'; return mode; },
+    useLs() { mode = 'ls'; },
+    get(k) {
+      if (mode === 'ls') { try { const v = localStorage.getItem(LSP + k); return Promise.resolve(v == null ? null : JSON.parse(v)); } catch (e) { return Promise.resolve(null); } }
+      return new Promise(res => { try { const rq = db.transaction('kv').objectStore('kv').get(k); rq.onsuccess = () => res(rq.result === undefined ? null : rq.result); rq.onerror = () => res(null); } catch (e) { res(null); } });
+    },
+    set(k, v) {
+      if (mode === 'ls') { try { localStorage.setItem(LSP + k, JSON.stringify(v)); return Promise.resolve(true); } catch (e) { return Promise.resolve(false); } }
+      return new Promise(res => { try { const tx = db.transaction('kv', 'readwrite'); tx.objectStore('kv').put(v, k); tx.oncomplete = () => res(true); tx.onerror = tx.onabort = () => res(false); } catch (e) { res(false); } });
+    },
+  };
+})();
+
+/* ====================== النموذج والبيانات ====================== */
+const PLANS = {
+  q15: {label: 'ربع ساعة', unit: 15, qlabel: 'عدد أرباع الساعة (اختياري)'},
+  q30: {label: 'نصف ساعة', unit: 30, qlabel: 'عدد أنصاف الساعة (اختياري)'},
+  h60: {label: 'ساعة', unit: 60, qlabel: 'عدد الساعات (اختياري)'},
+  month: {label: 'اشتراك شهري', unit: 0, qlabel: 'عدد الأشهر'},
+};
+const TERMS = "1) يقرّ المستأجر باستلام الدراجة سليمة وبالحالة الموضحة، ويلتزم بإعادتها بنفس الحالة.\n2) المستأجر مسؤول عن أي ضرر أو فقدان أو مخالفات مرورية أثناء مدة الإيجار.\n3) يُمنع تأجير الدراجة لشخص آخر أو استخدامها خارج النظام العام.\n4) التأخير عن موعد الإرجاع يُحتسب بسعر الإيجار المتفق عليه.\n5) يُسترد التأمين عند تسليم الدراجة سليمة، ويُخصم منه قيمة أي ضرر.";
+const DEF = {shop_name: 'محلات تأجير الدراجات', shop_phone: '', footer: 'شكراً لزيارتكم', default_rate: 300, grace: 0, round_to: 1,
+             late_pct: 0, early_mode: 'actual', auto_delete: false, opening_cash: 0, pin: '', last_backup: 0, contract_terms: TERMS};
+const emptyDB = () => ({v: 3, settings: {...DEF}, bikes: [], customers: [], rentals: [], cash: [], maint: [], types: [], users: [], log: [],
+                        seq: {bike: 0, cust: 0, rent: 0, cash: 0, maint: 0, type: 0, user: 0, log: 0}});
+function normalize(d) {
+  const b = emptyDB();
+  b.settings = {...DEF, ...(d.settings || {})};
+  if (b.settings.early_mode !== 'agreed') b.settings.early_mode = 'actual';
+  b.bikes = (d.bikes || []).map(x => ({id: x.id, name: x.name || x.model || '', type_id: +x.type_id || 0, size: x.size || '', serial: x.serial || x.plate || '',
+    buy_price: +x.buy_price || 0, sell_price: +x.sell_price || 0, rate: +x.rate || 0, month_price: +x.month_price || 0,
+    status: ['available', 'maintenance', 'sold'].includes(x.status) ? x.status : 'available', buy_date: x.buy_date || 0,
+    sold_at: x.sold_at || 0, sold_price: +x.sold_price || 0, sold_to: x.sold_to || '', notes: x.notes || ''}));
+  b.customers = (d.customers || []).map(c => ({id: c.id, name: c.name || '', phone: c.phone || '', address: c.address || '',
+    guarantor: c.guarantor || '', guarantor_phone: c.guarantor_phone || '', blocked: c.blocked ? 1 : 0, block_reason: c.block_reason || '', notes: ((c.idno ? 'هوية: ' + c.idno + ' ' : '') + (c.notes || '')).trim(), created: c.created || 0}));
+  b.rentals = (d.rentals || []).map(r => ({id: r.id, bike_id: r.bike_id, customer_id: r.customer_id,
+    plan: PLANS[r.plan] ? r.plan : 'h60', unit_min: r.unit_min !== undefined ? r.unit_min : 60,
+    price: +(r.price !== undefined ? r.price : r.rate) || 0, qty: +(r.qty !== undefined ? r.qty : Math.ceil((r.expected_min || 0) / 60)) || 0,
+    start: r.start, planned_end: r.planned_end !== undefined ? r.planned_end : (r.expected_min ? r.start + r.expected_min * 60000 : 0),
+    arrival: r.arrival !== undefined ? r.arrival : (r.end || null), delay_min: +r.delay_min || 0, delay_cost: +r.delay_cost || 0, base: +r.base || 0,
+    deposit: +r.deposit || 0, deposit_note: r.deposit_note || '', discount: +r.discount || 0, total: +r.total || 0, paid: +r.paid || 0,
+    refund: +r.refund || 0, status: r.status, notes: r.notes || '', by: r.by || ''}));
+  b.cash = Array.isArray(d.cash) ? d.cash : (d.payments || []).map((p, i) => ({id: i + 1, at: p.at, type: p.kind === 'debt' ? 'debt' : 'rental_pay', amount: +p.amount || 0, ref: p.rental_id, cat: '', note: ''}));
+  b.maint = Array.isArray(d.maint) ? d.maint : [];
+  b.types = (d.types || []).map(t => ({id: t.id, name: t.name || '', rate: +t.rate || 0, month_price: +t.month_price || 0, notes: t.notes || ''}));
+  b.users = (d.users || []).map(u => ({id: u.id, name: u.name || '', role: u.role === 'staff' ? 'staff' : 'admin', pin: u.pin || '', legacy: !!u.legacy, active: u.active !== false}));
+  b.log = Array.isArray(d.log) ? d.log.slice(-1000) : [];
+  b.seq = {...b.seq, ...(d.seq || {})};
+  const mx = a => Math.max(0, ...a.map(x => x.id || 0));
+  b.seq.bike = Math.max(b.seq.bike, mx(b.bikes)); b.seq.cust = Math.max(b.seq.cust, mx(b.customers));
+  b.seq.rent = Math.max(b.seq.rent, mx(b.rentals)); b.seq.cash = Math.max(b.seq.cash, mx(b.cash)); b.seq.maint = Math.max(b.seq.maint, mx(b.maint));
+  b.seq.type = Math.max(b.seq.type, mx(b.types)); b.seq.user = Math.max(b.seq.user, mx(b.users)); b.seq.log = Math.max(b.seq.log, mx(b.log));
+  if (!b.users.length && b.settings.pin) { b.users.push({id: ++b.seq.user, name: 'المدير', role: 'admin', pin: b.settings.pin, legacy: true, active: true}); }   // ترحيل القفل القديم
+  b.settings.pin = '';
+  return b;
+}
+let DB = emptyDB(), PHOTOS = {}, READY = false;
+let saving = false, dirty = false, LAST = '', warned = false;
+function save() { dirty = true; if (!saving) flush(); }
+async function flush() {
+  saving = true;
+  while (dirty) {
+    dirty = false;
+    const js = JSON.stringify(DB);
+    const ok = await store.set('db', js);
+    if (ok) { if (LAST) await store.set('db_prev', LAST); LAST = js; }
+    else if (!warned) { warned = true; alert('تعذر حفظ البيانات! قد تكون المساحة ممتلئة أو التخزين معطّل. نزّل نسخة احتياطية الآن من الإعدادات.'); }
+  }
+  saving = false;
+}
+const whenSaved = () => new Promise(r => { const t = () => (saving || dirty) ? setTimeout(t, 15) : r(true); t(); });
+async function savePhotos() { if (!(await store.set('photos', PHOTOS)) && !warned) { warned = true; alert('تعذر حفظ الصور. المساحة قد تكون ممتلئة.'); } }
+const nid = k => ++DB.seq[k];
+const TMP = {};
+let FLASH = null;
+const flash = (t, m) => { FLASH = [t, m]; };
+
+/* ====================== أدوات ====================== */
+const $ = s => document.querySelector(s);
+const esc = s => String(s == null ? '' : s).replace(/[&<>"']/g, c => ({'&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;'}[c]));
+const AR = '٠١٢٣٤٥٦٧٨٩';
+const numIn = s => { const t = String(s == null ? '' : s).replace(/[٠-٩]/g, d => AR.indexOf(d)).replace(/[٫،,]/g, '.'); const n = parseFloat(t.replace(/[^0-9.]/g, '')); return isNaN(n) ? 0 : n; };
+const fmt = n => { n = +n || 0; return (Math.abs(n - Math.round(n)) < 0.005 ? Math.round(n) : Math.round(n * 100) / 100).toLocaleString('en-US'); };
+const pad = n => String(n).padStart(2, '0');
+const dtf = ts => { if (!ts) return '—'; const d = new Date(ts); return d.getFullYear() + '-' + pad(d.getMonth() + 1) + '-' + pad(d.getDate()) + ' ' + pad(d.getHours()) + ':' + pad(d.getMinutes()); };
+const dayKey = ts => { const d = new Date(ts); return d.getFullYear() + '-' + pad(d.getMonth() + 1) + '-' + pad(d.getDate()); };
+const dtLocal = ts => dayKey(ts) + 'T' + pad(new Date(ts).getHours()) + ':' + pad(new Date(ts).getMinutes());
+const parseLocal = v => v ? new Date(v).getTime() : NaN;
+const dateToTs = v => (!v || v === dayKey(Date.now())) ? Date.now() : new Date(v + 'T12:00:00').getTime();
+const dur = sec => { sec = Math.max(0, Math.floor(sec)); const d = Math.floor(sec / 86400), r = sec % 86400; return (d ? d + 'ي ' : '') + pad(Math.floor(r / 3600)) + ':' + pad(Math.floor(r % 3600 / 60)) + ':' + pad(r % 60); };
+const durMin = m => { m = Math.max(0, Math.round(m)); const d = Math.floor(m / 1440), h = Math.floor(m % 1440 / 60), mm = m % 60; return (d ? d + ' يوم ' : '') + (h ? h + ' ساعة ' : '') + (mm || (!d && !h) ? mm + ' دقيقة' : ''); };
+const sum = (a, f) => a.reduce((x, y) => x + (+f(y) || 0), 0);
+const CUR = 'ريال';
+const addMonths = (ts, n) => { const d = new Date(ts); d.setMonth(d.getMonth() + n); return d.getTime(); };
+const fail = m => { alert(m); };
+
+const bikeOf = id => DB.bikes.find(b => b.id === id);
+const custOf = id => DB.customers.find(c => c.id === id);
+const rentalOf = id => DB.rentals.find(r => r.id === id);
+const isRented = id => DB.rentals.some(r => r.status === 'active' && r.bike_id === id);
+const activeRentals = () => DB.rentals.filter(r => r.status === 'active').sort((a, b) => a.start - b.start);
+const cname = r => (TMP[r.id] && TMP[r.id].name) || (custOf(r.customer_id) && custOf(r.customer_id).name) || 'عميل محذوف';
+const balance = r => r.status !== 'finished' ? 0 : Math.max(0, r.total - Math.min(r.deposit, r.total) - r.paid);
+const bikeLabel = b => b ? (b.name + (b.serial ? ' · ' + b.serial : '')) : 'دراجة محذوفة';
+const planLabel = r => PLANS[r.plan].label;
+const openMaint = bid => DB.maint.some(m => m.bike_id === bid && m.status === 'open');
+const initial = s => (String(s || '?').trim()[0] || '?');
+const avatar = (c, lg) => (c && PHOTOS[c.id]) ? '<img class="avatar' + (lg ? ' lg' : '') + '" src="' + PHOTOS[c.id] + '" alt="">' : '<span class="avatar' + (lg ? ' lg' : '') + '">' + esc(initial(c && c.name)) + '</span>';
+
+/* ====================== الصندوق (دفتر الحركات) ====================== */
+const CASH = {
+  adv: ['عربون / دفعة مقدمة', 1], rental_pay: ['دفعة إيجار', 1], debt: ['سداد دين', 1], refund: ['رد عربون', -1],
+  expense: ['مصروف', -1], maint: ['صيانة', -1], bike_buy: ['شراء دراجة', -1], bike_sale: ['بيع دراجة', 1],
+  owner_in: ['إيداع من المالك', 1], owner_out: ['سحب المالك', -1],
+};
+function cashAdd(type, amount, ref, cat, note, at) {
+  amount = Math.abs(+amount || 0); if (!amount) return;
+  DB.cash.push({id: nid('cash'), at: at || Date.now(), type, amount: amount * CASH[type][1], ref: ref || 0, cat: cat || '', note: note || ''});
+}
+const cashBalance = () => (+DB.settings.opening_cash || 0) + sum(DB.cash, e => e.amount);
+
+/* ====================== حساب الإيجار ======================
+ * الوحدة (15/30/60 دقيقة) تُحسب كاملة إذا تجاوزت دقائق السماح. إن حُدّدت مدة متفق عليها:
+ *  - تأخير = الوقت الفعلي بعد المدة المتفقة، ويُحسب بوحدات كاملة × السعر × (1 + نسبة التأخير).
+ *  - إرجاع مبكر: الوقت الفعلي (الافتراضي) أو المدة المتفقة كاملة حسب الإعداد.
+ * الاشتراك الشهري: سعر ثابت لكل شهر، والتأخير يُحسب بالأيام (سعر الشهر ÷ 30 لليوم).
+ */
+function ceilGrace(mins, unit, grace) {
+  let f = Math.floor(mins / unit + 1e-9); const rem = mins - f * unit;
+  if (rem > 1e-9 && rem > grace) f++;
+  return f;
+}
+function calcRental(r, arr) {
+  const S = DB.settings, grace = Math.max(0, +S.grace || 0), late = +S.late_pct || 0, to = Math.max(1, +S.round_to || 1);
+  const elapsed = Math.max(0, (arr - r.start) / 60000);
+  let base = 0, delayMin = 0, delayCost = 0, units = 0;
+  if (r.plan === 'month') {
+    const months = Math.max(1, r.qty || 1); base = months * r.price; units = months;
+    const pe = r.planned_end || addMonths(r.start, months), d = Math.max(0, (arr - pe) / 60000);
+    if (d > grace) { delayMin = Math.floor(d); delayCost = Math.ceil(d / 1440 - 1e-9) * (r.price / 30) * (1 + late / 100); }
+  } else {
+    const u = r.unit_min || 60, actual = Math.max(1, ceilGrace(elapsed, u, grace));
+    if (r.qty > 0) {
+      const d = elapsed - r.qty * u;
+      if (d > grace) { delayMin = Math.floor(d); delayCost = Math.ceil(d / u - 1e-9) * r.price * (1 + late / 100); base = r.qty * r.price; units = r.qty; }
+      else { units = S.early_mode === 'agreed' ? r.qty : Math.min(r.qty, actual); base = units * r.price; }
+    } else { units = actual; base = actual * r.price; }
+  }
+  base = Math.round(base); delayCost = Math.round(delayCost);
+  return {base, delayMin, delayCost, total: Math.round((base + delayCost) / to) * to, units, elapsed};
+}
+function plannedEnd(plan, start, qty) {
+  if (plan === 'month') return addMonths(start, Math.max(1, qty));
+  return qty > 0 ? start + qty * PLANS[plan].unit * 60000 : 0;
+}
+
+/* ====================== الصور ====================== */
+let PEND = {mode: 'keep', data: null};
+function readPhoto(file) {
+  return new Promise((res, rej) => {
+    const img = new Image(), url = URL.createObjectURL(file);
+    img.onload = () => {
+      const M = 480; let w = img.naturalWidth, h = img.naturalHeight; const s = Math.min(1, M / Math.max(w, h));
+      w = Math.max(1, Math.round(w * s)); h = Math.max(1, Math.round(h * s));
+      const c = document.createElement('canvas'); c.width = w; c.height = h; c.getContext('2d').drawImage(img, 0, 0, w, h);
+      URL.revokeObjectURL(url); res(c.toDataURL('image/jpeg', 0.72));
+    };
+    img.onerror = () => { URL.revokeObjectURL(url); rej(new Error('img')); };
+    img.src = url;
+  });
+}
+function applyPhoto(cid) {
+  if (PEND.mode === 'set' && PEND.data) { PHOTOS[cid] = PEND.data; savePhotos(); }
+  else if (PEND.mode === 'remove' && PHOTOS[cid]) { delete PHOTOS[cid]; savePhotos(); }
+  PEND = {mode: 'keep', data: null};
+}
+
+/* ====================== العمليات ====================== */
+function startRental(f) {
+  const bike = bikeOf(+f.bike_id);
+  if (!bike || bike.status !== 'available' || isRented(bike.id)) return fail('الدراجة غير متاحة للتأجير');
+  const plan = PLANS[f.plan] ? f.plan : 'h60', price = numIn(f.price);
+  if (price <= 0) return fail('أدخل سعر الإيجار');
+  const start = f.start ? parseLocal(f.start) : Date.now();
+  if (isNaN(start) || start > Date.now() + 60000) return fail('وقت البداية غير صحيح أو في المستقبل');
+  let qty = Math.max(0, Math.round(numIn(f.qty))); if (plan === 'month') qty = Math.max(1, qty);
+  let cid = +f.customer_id || 0;
+  if (!cid) {
+    const name = (f.c_name || '').trim(); if (!name) return fail('اختر عميلاً أو أدخل اسم عميل جديد');
+    cid = nid('cust');
+    DB.customers.push({id: cid, name, phone: (f.c_phone || '').trim(), address: (f.c_address || '').trim(), guarantor: (f.c_guarantor || '').trim(),
+      guarantor_phone: (f.c_gphone || '').trim(), notes: '', created: Date.now()});
+    applyPhoto(cid);
+  }
+  const cuX = custOf(cid);
+  if (cuX && cuX.blocked) return fail('هذا العميل محظور' + (cuX.block_reason ? ': ' + cuX.block_reason : '') + '. يرفع المدير الحظر أولاً.');
+  const rid = nid('rent'), deposit = numIn(f.deposit);
+  DB.rentals.push({id: rid, bike_id: bike.id, customer_id: cid, plan, unit_min: PLANS[plan].unit, price, qty, start, planned_end: plannedEnd(plan, start, qty),
+    arrival: null, delay_min: 0, delay_cost: 0, base: 0, deposit, deposit_note: (f.deposit_note || '').trim(), discount: 0, total: 0, paid: 0, refund: 0,
+    status: 'active', notes: (f.notes || '').trim(), by: who()});
+  if (deposit > 0) cashAdd('adv', deposit, rid, '', 'عربون إيجار #' + rid, start > Date.now() - 36e5 ? Date.now() : start);
+  logAct('إيجار جديد', '#' + rid + ' — ' + bikeLabel(bike) + ' — ' + (custOf(cid) || {}).name + ' — ' + PLANS[plan].label + ' ' + fmt(price));
+  save(); flash('ok', 'بدأ الإيجار — العداد يعمل الآن'); go('dashboard');
+}
+
+function finishRental(id, f) {
+  const r = rentalOf(id);
+  if (!r || r.status !== 'active') { flash('err', 'هذا الإيجار منتهٍ أو غير موجود'); return go('dashboard'); }
+  const arr = f.arrival ? parseLocal(f.arrival) : Date.now();
+  if (isNaN(arr) || arr > Date.now() + 60000) return fail('وقت الوصول غير صحيح أو في المستقبل');
+  if (arr < r.start) return fail('وقت الوصول قبل وقت البداية');
+  const c = calcRental(r, arr), disc = Math.min(Math.max(0, numIn(f.discount)), c.total), total = c.total - disc;
+  const due = Math.max(0, total - Math.min(r.deposit, total)), raw = String(f.paid == null ? '' : f.paid).trim();
+  const paid = raw === '' ? due : Math.min(Math.max(0, numIn(raw)), due), refund = Math.max(0, r.deposit - total), endNote = (f.end_notes || '').trim();
+  Object.assign(r, {arrival: arr, delay_min: c.delayMin, delay_cost: c.delayCost, base: c.base, discount: disc, total, paid, refund, status: 'finished',
+                    notes: (r.notes || '') + (endNote ? ' | ' + endNote : '')});
+  if (paid > 0) cashAdd('rental_pay', paid, r.id, '', 'إيجار #' + r.id);
+  if (refund > 0) cashAdd('refund', refund, r.id, '', 'رد عربون إيجار #' + r.id);
+  if (f.del_customer) {
+    const other = DB.rentals.some(x => x.customer_id === r.customer_id && x.status === 'active' && x.id !== r.id);
+    if (balance(r) > 0) flash('err', 'لم يُحذف العميل لأن عليه مبلغاً متبقياً');
+    else if (other) flash('err', 'لم يُحذف العميل لأن عنده إيجاراً آخر جارياً');
+    else { const cu = custOf(r.customer_id); if (cu) { TMP[r.id] = {name: cu.name, phone: cu.phone}; DB.customers = DB.customers.filter(x => x.id !== cu.id); delete PHOTOS[cu.id]; savePhotos(); flash('ok', 'تم حذف بيانات العميل'); } }
+  }
+  logAct('إنهاء إيجار', '#' + r.id + ' — الإجمالي ' + fmt(total) + ' — مدفوع ' + fmt(paid) + (balance(r) > 0 ? ' — متبقي ' + fmt(balance(r)) : ''));
+  save(); go('receipt/' + r.id);
+}
+
+function cancelRental(id) {
+  if (!needAdmin()) return;
+  const r = rentalOf(id); if (!r || r.status !== 'active') return go('dashboard');
+  r.status = 'cancelled'; r.arrival = Date.now();
+  if (r.deposit > 0) cashAdd('refund', r.deposit, r.id, '', 'إلغاء إيجار #' + r.id + ' ورد العربون');
+  logAct('إلغاء إيجار', '#' + r.id);
+  save(); flash('ok', 'تم إلغاء الإيجار'); go('dashboard');
+}
+
+function payDebt(id, amount) {
+  const r = rentalOf(id); if (!r || r.status !== 'finished') return go('dashboard');
+  const amt = Math.min(numIn(amount), balance(r));
+  if (amt > 0) { r.paid += amt; cashAdd('debt', amt, r.id, '', 'سداد إيجار #' + r.id); logAct('سداد دين', '#' + r.id + ' — ' + fmt(amt)); save(); flash('ok', 'تم تسجيل الدفعة'); }
+  go('receipt/' + id);
+}
+function payCustomerDebt(cid, amount) {
+  let left = numIn(amount); if (left <= 0) return fail('أدخل مبلغاً صحيحاً');
+  const debts = DB.rentals.filter(r => r.customer_id === cid && balance(r) > 0).sort((a, b) => a.id - b.id);
+  const total = sum(debts, balance); if (!total) return fail('لا يوجد دين على هذا العميل');
+  left = Math.min(left, total); const paidTotal = left;
+  for (const r of debts) { if (left <= 0) break; const p = Math.min(left, balance(r)); r.paid += p; cashAdd('debt', p, r.id, '', 'سداد إيجار #' + r.id); left -= p; }
+  logAct('سداد دين عميل', (custOf(cid) || {}).name + ' — ' + fmt(paidTotal));
+  save(); flash('ok', 'تم تسجيل دفعة ' + fmt(paidTotal) + ' ' + CUR); go('customer/' + cid);
+}
+
+function saveBike(f) {
+  if (!needAdmin()) return;
+  const name = (f.name || '').trim(), serial = (f.serial || '').trim();
+  if (!name) return fail('أدخل اسم الدراجة');
+  if (serial && DB.bikes.some(b => b.serial === serial && b.id !== +f.id)) return fail('الرقم التسلسلي مسجل مسبقاً');
+  const v = {name, type_id: +f.type_id || 0, size: (f.size || '').trim(), serial, buy_price: numIn(f.buy_price), sell_price: numIn(f.sell_price), rate: numIn(f.rate), month_price: numIn(f.month_price), notes: (f.notes || '').trim()};
+  const ty = DB.types.find(t => t.id === v.type_id);
+  if (ty && !v.rate) v.rate = ty.rate;
+  if (ty && !v.month_price) v.month_price = ty.month_price;
+  if (+f.id) {
+    const b = bikeOf(+f.id); Object.assign(b, v);
+    const e = DB.cash.find(x => x.type === 'bike_buy' && x.ref === b.id); if (e) e.amount = -Math.abs(v.buy_price);
+    flash('ok', 'تم حفظ التعديل');
+  } else {
+    const id = nid('bike'), at = dateToTs(f.buy_date);
+    DB.bikes.push({id, ...v, status: 'available', buy_date: at, sold_at: 0, sold_price: 0, sold_to: ''});
+    if (!f.existing && v.buy_price > 0) cashAdd('bike_buy', v.buy_price, id, '', 'شراء ' + name, at);
+    flash('ok', f.existing ? 'تمت إضافة الدراجة' : 'تم تسجيل شراء الدراجة وخصم ثمنها من الصندوق');
+  }
+  logAct(+f.id ? 'تعديل دراجة' : 'شراء/إضافة دراجة', name + (serial ? ' ' + serial : '') + (v.buy_price ? ' — ' + fmt(v.buy_price) : ''));
+  save(); go('bikes');
+}
+function sellBike(id, f) {
+  if (!needAdmin()) return;
+  const b = bikeOf(id); if (!b || b.status === 'sold') return go('bikes');
+  if (isRented(b.id) || openMaint(b.id)) return fail('لا يمكن بيع دراجة مؤجرة أو في الصيانة');
+  const price = numIn(f.sold_price); if (price <= 0) return fail('أدخل سعر البيع');
+  const at = dateToTs(f.sold_date);
+  Object.assign(b, {status: 'sold', sold_price: price, sold_at: at, sold_to: (f.sold_to || '').trim()});
+  cashAdd('bike_sale', price, b.id, '', 'بيع ' + b.name + (b.sold_to ? ' إلى ' + b.sold_to : ''), at);
+  logAct('بيع دراجة', bikeLabel(b) + ' — ' + fmt(price) + (b.sold_to ? ' إلى ' + b.sold_to : ''));
+  save(); flash('ok', 'تم بيع الدراجة وإضافة المبلغ للصندوق'); go('bikes');
+}
+function undoSale(id) {
+  if (!needAdmin()) return;
+  const b = bikeOf(id); if (!b || b.status !== 'sold') return;
+  DB.cash = DB.cash.filter(e => !(e.type === 'bike_sale' && e.ref === b.id));
+  Object.assign(b, {status: 'available', sold_price: 0, sold_at: 0, sold_to: ''}); logAct('إلغاء بيع دراجة', bikeLabel(b)); save(); flash('ok', 'تم إلغاء البيع'); render();
+}
+function deleteBike(id) {
+  if (!needAdmin()) return;
+  if (DB.rentals.some(r => r.bike_id === id) || DB.maint.some(m => m.bike_id === id)) { flash('err', 'لا يمكن حذف دراجة لها إيجارات أو صيانة'); return render(); }
+  if (!confirm('حذف الدراجة؟ سيُحذف أيضاً قيد شراؤها من الصندوق.')) return;
+  logAct('حذف دراجة', bikeLabel(bikeOf(id)));
+  DB.bikes = DB.bikes.filter(b => b.id !== id); DB.cash = DB.cash.filter(e => !(e.type === 'bike_buy' && e.ref === id));
+  save(); flash('ok', 'تم حذف الدراجة'); render();
+}
+
+function saveMaint(f, el) {
+  const bike = bikeOf(+f.bike_id); if (!bike || bike.status === 'sold' || isRented(bike.id)) return fail('اختر دراجة غير مؤجرة');
+  const names = [...el.querySelectorAll('[name=part_name]')], costs = [...el.querySelectorAll('[name=part_cost]')];
+  const parts = names.map((n, i) => ({name: n.value.trim(), cost: numIn(costs[i].value)})).filter(p => p.name || p.cost > 0);
+  if (parts.some(p => !p.name)) return fail('اكتب اسم كل قطعة أو عملية');
+  const labor = numIn(f.labor), total = sum(parts, p => p.cost) + labor;
+  if (!parts.length && labor <= 0) return fail('أضف قطعة أو أجرة عمل واحدة على الأقل');
+  const id = nid('maint'), at = dateToTs(f.date), inShop = !!f.in_shop;
+  DB.maint.push({id, bike_id: bike.id, date: at, parts, labor, total, notes: (f.notes || '').trim(), status: inShop ? 'open' : 'done', done_at: inShop ? 0 : at});
+  if (inShop && bike.status === 'available') bike.status = 'maintenance';
+  cashAdd('maint', total, id, '', 'صيانة ' + bike.name, at);
+  logAct('صيانة', bike.name + ' — ' + parts.map(p => p.name).join('، ') + ' — ' + fmt(total));
+  save(); flash('ok', inShop ? 'سُجّلت الصيانة والدراجة خارج الخدمة حتى تكتمل' : 'تم تسجيل الصيانة'); go('maint');
+}
+function addPart(mid, f) {
+  const m = DB.maint.find(x => x.id === mid); if (!m) return;
+  const name = (f.name || '').trim(), cost = numIn(f.cost); if (!name || cost <= 0) return fail('أدخل اسم القطعة وتكلفتها');
+  m.parts.push({name, cost}); m.total += cost; cashAdd('maint', cost, mid, '', name); logAct('قطعة صيانة', name + ' — ' + fmt(cost)); save(); flash('ok', 'تمت إضافة القطعة'); render();
+}
+function completeMaint(mid) {
+  const m = DB.maint.find(x => x.id === mid); if (!m || m.status !== 'open') return;
+  m.status = 'done'; m.done_at = Date.now(); logAct('اكتمال صيانة', bikeLabel(bikeOf(m.bike_id)));
+  const b = bikeOf(m.bike_id); if (b && b.status === 'maintenance' && !openMaint(b.id)) b.status = 'available';
+  save(); flash('ok', 'اكتملت الصيانة وعادت الدراجة للخدمة'); render();
+}
+function deleteMaint(mid) {
+  if (!needAdmin()) return;
+  const m = DB.maint.find(x => x.id === mid); if (!m || !confirm('حذف سجل الصيانة؟ سيُحذف قيده من الصندوق أيضاً.')) return;
+  DB.maint = DB.maint.filter(x => x.id !== mid); DB.cash = DB.cash.filter(e => !(e.type === 'maint' && e.ref === mid));
+  const b = bikeOf(m.bike_id); if (b && b.status === 'maintenance' && !openMaint(b.id)) b.status = 'available';
+  logAct('حذف سجل صيانة', bikeLabel(bikeOf(m.bike_id)) + ' — ' + fmt(m.total));
+  save(); flash('ok', 'تم حذف سجل الصيانة'); render();
+}
+
+function saveType(f) {
+  if (!needAdmin()) return;
+  const name = (f.name || '').trim(); if (!name) return fail('أدخل اسم النوع');
+  if (DB.types.some(t => t.name === name && t.id !== +f.id)) return fail('اسم النوع مسجّل مسبقاً');
+  const v = {name, rate: numIn(f.rate), month_price: numIn(f.month_price), notes: (f.notes || '').trim()};
+  if (+f.id) {
+    const t = DB.types.find(x => x.id === +f.id); let n = 0; Object.assign(t, v);
+    if (f.apply) DB.bikes.filter(b => b.type_id === t.id).forEach(b => { b.rate = v.rate; b.month_price = v.month_price; n++; });
+    logAct('تعديل نوع دراجات', name + (f.apply ? ' — طُبّق السعر على ' + n + ' دراجة' : '')); flash('ok', f.apply ? 'تم الحفظ وتطبيق السعر على ' + n + ' دراجة (الإيجارات الجارية لا تتأثر)' : 'تم حفظ النوع');
+  } else { DB.types.push({id: nid('type'), ...v}); logAct('إضافة نوع دراجات', name); flash('ok', 'تمت إضافة النوع'); }
+  save(); go('types');
+}
+function deleteType(id) {
+  if (!needAdmin()) return;
+  const t = DB.types.find(x => x.id === id); if (!t || !confirm('حذف النوع؟ ستبقى دراجاته بأسعارها الحالية بدون نوع.')) return;
+  DB.bikes.forEach(b => { if (b.type_id === id) b.type_id = 0; }); DB.types = DB.types.filter(x => x.id !== id);
+  logAct('حذف نوع دراجات', t.name); save(); flash('ok', 'تم حذف النوع'); render();
+}
+async function saveUser(f) {
+  if (!needAdmin()) return;
+  const name = (f.name || '').trim(), pin = String(f.pin || '').trim();
+  if (!name) return fail('أدخل اسم المستخدم');
+  if (pin.length < 4) return fail('الرقم السري 4 أرقام على الأقل');
+  if (DB.users.some(u => u.name === name)) return fail('هذا الاسم مستخدم');
+  const first = !hasUsers();
+  const u = {id: nid('user'), name, role: (first || f.role === 'admin') ? 'admin' : 'staff', pin: '', legacy: false, active: true};
+  u.pin = await hashPin(pin, u); DB.users.push(u);
+  if (first) ssSet('uid', u.id);
+  logAct('إضافة مستخدم', name + ' (' + (u.role === 'admin' ? 'مدير' : 'موظف') + ')'); save();
+  flash('ok', first ? 'تم إنشاء حساب المدير وتفعيل القفل' : 'تمت إضافة المستخدم'); go('users');
+}
+function lastAdminGuard(u) { if (u.active && u.role === 'admin' && activeAdmins().length <= 1) { alert('لا يمكن: يجب أن يبقى مدير واحد مفعّل على الأقل.'); return true; } return false; }
+function purgeCustomers() {
+  if (!needAdmin()) return;
+  const keep = new Set(); DB.rentals.forEach(r => { if (r.status === 'active' || balance(r) > 0) keep.add(r.customer_id); });
+  const hasDone = new Set(DB.rentals.filter(r => r.status === 'finished').map(r => r.customer_id));
+  const gone = DB.customers.filter(c => hasDone.has(c.id) && !keep.has(c.id));
+  DB.customers = DB.customers.filter(c => !gone.includes(c)); gone.forEach(c => delete PHOTOS[c.id]); savePhotos();
+  logAct('تنظيف العملاء', 'حُذف ' + gone.length + ' عميل');
+  save(); flash('ok', 'تم حذف ' + gone.length + ' عميل أكملوا إيجاراتهم');
+}
+
+/* ====================== النسخ الاحتياطي ====================== */
+function backupFile() {
+  const n = new Date(), name = 'rental_backup_' + dayKey(n) + '_' + pad(n.getHours()) + '-' + pad(n.getMinutes()) + '.json';
+  return new File([JSON.stringify({...DB, photos: PHOTOS})], name, {type: 'application/json'});
+}
+function markBackup() { DB.settings.last_backup = Date.now(); save(); }
+function downloadBackup() {
+  const f = backupFile(), url = URL.createObjectURL(f), a = document.createElement('a');
+  a.href = url; a.download = f.name; document.body.appendChild(a); a.click(); a.remove(); setTimeout(() => URL.revokeObjectURL(url), 4000);
+  markBackup(); flash('ok', 'تم تنزيل النسخة الاحتياطية، احفظها في مكان آمن (واتساب أو Google Drive)'); render();
+}
+async function shareBackup() {
+  const f = backupFile();
+  if (navigator.canShare && navigator.canShare({files: [f]})) {
+    try { await navigator.share({files: [f], title: 'نسخة احتياطية - تأجير الدراجات'}); markBackup(); flash('ok', 'تمت مشاركة النسخة'); return render(); }
+    catch (e) { if (e && e.name === 'AbortError') return; }
+  }
+  downloadBackup();
+}
+function restoreBackup(file) {
+  if (!needAdmin()) return;
+  const rd = new FileReader();
+  rd.onload = async () => {
+    try {
+      const d = JSON.parse(rd.result);
+      if (!d || !Array.isArray(d.bikes) || !Array.isArray(d.rentals) || !Array.isArray(d.customers)) throw new Error('bad');
+      if (!confirm('سيتم استبدال كل البيانات الحالية بمحتوى النسخة (' + d.bikes.length + ' دراجة، ' + d.rentals.length + ' إيجار). متابعة؟')) return;
+      DB = normalize(d); PHOTOS = (d.photos && typeof d.photos === 'object') ? d.photos : {};
+      await savePhotos(); logAct('استرجاع نسخة احتياطية', ''); save(); flash('ok', 'تم استرجاع النسخة الاحتياطية'); go('dashboard');
+    } catch (e) { alert('الملف غير صالح. اختر ملف نسخة احتياطية صحيح (.json).'); }
+  };
+  rd.readAsText(file);
+}
+
+/* ====================== القفل بالرقم السري ====================== */
+async function hashPin(p, u) {
+  const salt = (u && !u.legacy) ? 'rent:' + u.id + ':' : 'rent:';
+  if (window.crypto && crypto.subtle) { const b = await crypto.subtle.digest('SHA-256', new TextEncoder().encode(salt + p)); return 'h:' + [...new Uint8Array(b)].map(x => x.toString(16).padStart(2, '0')).join(''); }
+  let h = 5381; for (const ch of salt + p) h = ((h << 5) + h + ch.charCodeAt(0)) | 0; return 'p:' + h;
+}
+const ssGet = k => { try { return sessionStorage.getItem(k); } catch (e) { return null; } };
+const ssSet = (k, v) => { try { if (v === null) sessionStorage.removeItem(k); else sessionStorage.setItem(k, v); } catch (e) {} };
+const hasUsers = () => DB.users.some(u => u.active);
+const curUser = () => { const id = +ssGet('uid') || 0; return DB.users.find(u => u.id === id && u.active) || null; };
+const locked = () => hasUsers() && !curUser();
+const isAdmin = () => !hasUsers() || (!!curUser() && curUser().role === 'admin');
+const who = () => (curUser() && curUser().name) || 'المدير';
+const activeAdmins = () => DB.users.filter(u => u.active && u.role === 'admin');
+const needAdmin = () => { if (isAdmin()) return true; alert('هذه العملية للمدير فقط.'); return false; };
+let fails = 0, lockUntil = 0;
+function logAct(action, details) {
+  DB.log.push({id: nid('log'), at: Date.now(), user: who(), action, details: String(details || '').slice(0, 300)});
+  if (DB.log.length > 1500) DB.log.splice(0, DB.log.length - 1000);
+}
+
+/* ====================== التوجيه ====================== */
+function route() { const h = location.hash.replace(/^#\/?/, '') || 'dashboard'; const [p, q] = h.split('?'), parts = p.split('/'); return {name: parts[0], arg: parts[1], q: new URLSearchParams(q || '')}; }
+function go(h) { if (location.hash === '#/' + h) render(); else location.hash = '#/' + h; }
+
+/* ====================== العروض ====================== */
+function chip(s) {
+  const m = {available: ['متاحة', 'ok'], rented: ['مؤجرة', 'warn'], maintenance: ['صيانة', 'bad'], sold: ['مباعة', ''], active: ['جارٍ', 'warn'], finished: ['منتهٍ', 'ok'], cancelled: ['ملغي', 'bad'], open: ['قيد الصيانة', 'warn'], done: ['مكتملة', 'ok']};
+  return '<span class="chip ' + m[s][1] + '">' + m[s][0] + '</span>';
+}
+function fleetCounts() {
+  const live = DB.bikes.filter(b => b.status !== 'sold'), rented = live.filter(b => isRented(b.id)).length;
+  const maint = live.filter(b => !isRented(b.id) && b.status === 'maintenance').length;
+  return {total: live.length, rented, maint, avail: live.length - rented - maint, sold: DB.bikes.length - live.length};
+}
+function fleetBar() {
+  const c = fleetCounts();
+  return '<div class="stats"><div class="stat"><b>' + c.total + '</b><span>عدد الدراجات' + (c.sold ? ' (+' + c.sold + ' مباعة)' : '') + '</span></div><div class="stat ok"><b>' + c.avail + '</b><span>متاحة الآن</span></div>' +
+    '<div class="stat warn"><b>' + c.rented + '</b><span>مؤجرة الآن</span></div><div class="stat bad"><b>' + c.maint + '</b><span>في الصيانة</span></div></div>';
+}
+function backupBanner() {
+  const has = DB.bikes.length + DB.rentals.length + DB.customers.length > 0, last = DB.settings.last_backup, days = last ? Math.floor((Date.now() - last) / 864e5) : null;
+  if (!has || (last && days < 7)) return '';
+  return '<div class="fl warn noprint">' + (last ? 'مرّت ' + days + ' يوماً على آخر نسخة احتياطية.' : 'لم تنزّل نسخة احتياطية بعد.') + ' البيانات محفوظة على هذا الجوال فقط. <a href="#/settings">نزّل نسخة الآن</a></div>';
+}
+
+function vDashboard() {
+  const today = dayKey(Date.now()), done = DB.rentals.filter(r => r.status === 'finished' && r.arrival && dayKey(r.arrival) === today);
+  const tc = DB.cash.filter(e => dayKey(e.at) === today);
+  const collected = sum(tc.filter(e => ['adv', 'rental_pay', 'debt'].includes(e.type)), e => e.amount);
+  const spent = -sum(tc.filter(e => e.type === 'expense' || e.type === 'maint'), e => e.amount);
+  const act = activeRentals(), free = DB.bikes.filter(b => b.status === 'available' && !isRented(b.id)), bal = cashBalance();
+  return backupBanner() + fleetBar() +
+    '<div class="stats"><div class="stat"><b>' + fmt(sum(done, r => r.total)) + '</b><span>إيراد اليوم (' + CUR + ') · ' + done.length + ' إيجار</span></div>' +
+    '<div class="stat"><b>' + fmt(collected) + '</b><span>المحصّل اليوم</span></div>' +
+    (isAdmin() ? '<div class="stat warn"><b>' + fmt(spent) + '</b><span>مصروفات وصيانة اليوم</span></div>' +
+    '<div class="stat ' + (bal >= 0 ? 'ok' : 'bad') + '"><b>' + fmt(bal) + '</b><span>رصيد الصندوق</span></div>' : '') + '</div>' +
+    '<h1>الإيجارات الجارية</h1>' + (act.length ? '' : '<div class="card empty">لا توجد إيجارات جارية. اختر دراجة متاحة لبدء إيجار.</div>') +
+    '<div class="grid">' + act.map(r => { const c = custOf(r.customer_id); return '<div class="card rt" data-id="' + r.id + '">' +
+      '<div class="top2"><b>' + esc(bikeLabel(bikeOf(r.bike_id))) + '</b><span class="chip">' + esc(planLabel(r)) + ' · ' + fmt(r.price) + '</span></div>' +
+      '<div class="who">' + avatar(c) + '<span>' + esc(cname(r)) + (c && c.phone ? ' · ' + esc(c.phone) : '') + '</span></div>' +
+      '<div class="clock">00:00:00</div><div class="hint">بدأ ' + dtf(r.start) + (r.planned_end ? ' · ينتهي ' + dtf(r.planned_end) : ' · مدة مفتوحة') + '</div>' +
+      '<div class="sub" style="margin-top:6px"><span>المبلغ الآن: <b class="live-amt">0</b> ' + CUR + '</span><span class="rem"></span></div>' +
+      '<a class="btn block" href="#/end/' + r.id + '">استلام الدراجة وحساب المبلغ</a><a class="btn sec sm block" style="margin-top:6px" href="#/contract/' + r.id + '">طباعة العقد</a></div>'; }).join('') + '</div>' +
+    '<h2>الدراجات المتاحة</h2>' + (free.length ? '' : '<div class="card empty">' + (DB.bikes.length ? 'لا توجد دراجات متاحة حالياً.' : 'أضف أول دراجة من تبويب "الدراجات".') + '</div>') +
+    '<div class="grid">' + free.map(b => '<div class="card" style="margin:0"><div class="top2"><b>' + esc(b.name) + '</b>' + (b.rate ? '<span class="chip ok">' + fmt(b.rate) + ' / ساعة</span>' : '') + '</div>' +
+      '<div class="hint">' + esc([b.size && 'مقاس ' + b.size, b.serial].filter(Boolean).join(' · ')) + '</div><br><a class="btn block" href="#/rent?bike=' + b.id + '">تأجير هذه الدراجة</a></div>').join('') + '</div>';
+}
+
+function vRent(q) {
+  const bikes = DB.bikes.filter(b => b.status === 'available' && !isRented(b.id)), sel = +q.get('bike') || (bikes[0] && bikes[0].id);
+  if (!bikes.length) return '<h1>تأجير جديد</h1><div class="card empty">لا توجد دراجات متاحة حالياً.</div>';
+  const custs = [...DB.customers].sort((a, b) => a.name.localeCompare(b.name, 'ar'));
+  return '<h1>تأجير جديد</h1><form class="card" data-form="rent">' +
+    '<label>الدراجة</label><select name="bike_id" required>' + bikes.map(b => '<option value="' + b.id + '" data-rate="' + (b.rate || DB.settings.default_rate) + '" data-month="' + (b.month_price || '') + '"' + (b.id === sel ? ' selected' : '') + '>' + esc(bikeLabel(b) + (b.size ? ' — ' + b.size : '')) + '</option>').join('') + '</select>' +
+    '<label>المستأجر</label><select name="customer_id" id="cs"><option value="0">+ عميل جديد</option>' + custs.map(c => '<option value="' + c.id + '">' + (c.blocked ? '⛔ ' : '') + esc(c.name + (c.phone ? ' — ' + c.phone : '')) + '</option>').join('') + '</select>' +
+    '<div id="newc"><div class="row c2"><div><label>اسم العميل</label><input name="c_name"></div><div><label>رقم الهاتف</label><input name="c_phone" inputmode="tel"></div></div>' +
+    '<label>العنوان</label><input name="c_address"><div class="row c2"><div><label>الضامن / المعرِّف</label><input name="c_guarantor"></div><div><label>هاتف الضامن</label><input name="c_gphone" inputmode="tel"></div></div>' +
+    '<div class="photorow"><span id="pprev">' + '<span class="avatar lg">+</span>' + '</span><div><label class="btn sec sm" style="margin:0">التقاط / اختيار صورة العميل<input type="file" accept="image/*" id="pf" style="display:none"></label></div></div></div>' +
+    '<h2>الأجرة والمدة</h2><div class="row c2"><div><label>نظام الأجرة</label><select name="plan" id="plan">' + Object.entries(PLANS).map(([k, p]) => '<option value="' + k + '"' + (k === 'h60' ? ' selected' : '') + '>' + p.label + '</option>').join('') + '</select></div>' +
+    '<div><label id="plabel">السعر لكل ساعة (' + CUR + ') — إدخال يدوي</label><input name="price" id="price" inputmode="decimal" required></div></div>' +
+    '<div class="row c2"><div><label id="qlabel">' + PLANS.h60.qlabel + '</label><input name="qty" id="qty" inputmode="numeric" placeholder="اتركه فارغاً لمدة مفتوحة"></div>' +
+    '<div><label>توقيت البدء</label><input type="datetime-local" name="start" id="start" value="' + dtLocal(Date.now()) + '"><div class="hint">عدّله يدوياً إن بدأ الإيجار قبل تسجيله</div></div></div>' +
+    '<div id="rprev" class="card" style="background:var(--soft);margin:10px 0 0;padding:10px"></div>' +
+    '<div class="row c2"><div><label>عربون / دفعة مقدمة (' + CUR + ')</label><input name="deposit" inputmode="decimal" value="0"></div><div><label>ضمان آخر (هوية / رخصة ...)</label><input name="deposit_note" maxlength="150"></div></div>' +
+    '<label>ملاحظات</label><input name="notes" maxlength="255"><br><button class="btn big block">بدء الإيجار</button></form>';
+}
+
+function vEnd(id) {
+  const r = rentalOf(+id); if (!r || r.status !== 'active') { flash('err', 'الإيجار غير موجود أو منتهٍ'); return null; }
+  return '<h1>استلام الدراجة</h1><div class="card"><div class="kv"><span>الدراجة</span><b>' + esc(bikeLabel(bikeOf(r.bike_id))) + '</b></div><div class="kv"><span>المستأجر</span><b>' + esc(cname(r)) + '</b></div>' +
+    '<div class="kv"><span>نظام الأجرة</span><b>' + esc(planLabel(r)) + ' · ' + fmt(r.price) + ' ' + CUR + (r.qty ? ' × ' + r.qty : '') + '</b></div>' +
+    '<div class="kv"><span>توقيت البدء</span><b>' + dtf(r.start) + '</b></div><div class="kv"><span>توقيت الانتهاء المتفق عليه</span><b>' + (r.planned_end ? dtf(r.planned_end) : 'مفتوح') + '</b></div></div>' +
+    '<form class="card" data-form="end" data-id="' + r.id + '"><label>توقيت الوصول (الاستلام)</label><input type="datetime-local" name="arrival" id="arrival" value="' + dtLocal(Date.now()) + '"><div class="hint">الوقت الحالي افتراضياً، وعدّله إن كانت الدراجة وصلت قبل التسجيل</div>' +
+    '<div id="brk" style="margin-top:10px"></div>' +
+    '<div class="row c2"><div><label>خصم (' + CUR + ')</label><input name="discount" id="disc" inputmode="decimal" value="0"></div><div><label>المبلغ المدفوع الآن</label><input name="paid" id="paid" inputmode="decimal" placeholder="اتركه فارغاً = دفع كامل المطلوب"><div class="hint">أي مبلغ أقل يُسجَّل المتبقي دَيْناً على العميل</div></div></div>' +
+    '<label>ملاحظات الاستلام</label><input name="end_notes" maxlength="150">' +
+    (DB.settings.auto_delete ? '<label style="display:flex;gap:8px;align-items:center"><input type="checkbox" name="del_customer" value="1" checked> حذف بيانات العميل بعد الإنهاء</label><div class="hint">لا يُحذف إذا بقي عليه مبلغ</div>' : '') +
+    '<br><button class="btn big block">تأكيد الاستلام وإصدار الإيصال</button></form>' +
+    '<button class="btn bad sm noprint" data-act="cancel" data-id="' + r.id + '">إلغاء الإيجار (تم بالخطأ)</button>';
+}
+function bindEnd() {
+  const f = $('form[data-form=end]'); if (!f) return; const r = rentalOf(+f.dataset.id); if (!r) return;
+  const upd = () => {
+    const arr = f.arrival.value ? parseLocal(f.arrival.value) : Date.now(), box = $('#brk');
+    if (isNaN(arr) || arr < r.start) { box.innerHTML = '<div class="fl err">وقت الوصول قبل وقت البداية</div>'; return; }
+    const c = calcRental(r, arr), disc = Math.min(Math.max(0, numIn(f.discount.value)), c.total), total = c.total - disc;
+    const due = Math.max(0, total - Math.min(r.deposit, total)), refund = Math.max(0, r.deposit - total);
+    box.innerHTML = '<div class="kv"><span>المدة الفعلية</span><b dir="ltr">' + dur((arr - r.start) / 1000) + '</b></div>' +
+      '<div class="kv"><span>أجرة الإيجار</span><b>' + fmt(c.base) + ' ' + CUR + '</b></div>' +
+      '<div class="kv"><span>مدة التأخير</span><b>' + (c.delayMin ? '<span class="neg">' + durMin(c.delayMin) + '</span>' : '—') + '</b></div>' +
+      '<div class="kv"><span>تكلفة التأخير</span><b>' + (c.delayCost ? '<span class="neg">' + fmt(c.delayCost) + '</span> ' + CUR : '—') + '</b></div>' +
+      (disc ? '<div class="kv"><span>الخصم</span><b>−' + fmt(disc) + '</b></div>' : '') +
+      '<div class="kv"><span>الإجمالي</span><b class="big">' + fmt(total) + ' ' + CUR + '</b></div>' +
+      '<div class="kv"><span>العربون المستلم</span><b>' + fmt(r.deposit) + '</b></div>' +
+      '<div class="kv"><span>المطلوب دفعه الآن</span><b>' + fmt(due) + ' ' + CUR + '</b></div>' + (refund ? '<div class="kv"><span>يُرد للعميل من العربون</span><b>' + fmt(refund) + '</b></div>' : '');
+  };
+  ['input', 'change'].forEach(e => { f.arrival.addEventListener(e, upd); f.discount.addEventListener(e, upd); }); upd();
+}
+function bindBike() {
+  const sel = $('#btype'), f = $('form[data-form=bike]'); if (!sel || !f) return;
+  sel.onchange = () => { const o = sel.selectedOptions[0]; if (!o || o.value === '0') return; f.rate.value = o.dataset.rate || ''; f.month_price.value = o.dataset.month || ''; };
+}
+function bindRent() {
+  const f = $('form[data-form=rent]'); if (!f) return; PEND = {mode: 'keep', data: null};
+  let touched = false; const plan = f.plan, price = f.price, qty = f.qty, start = f.start, bike = f.bike_id;
+  const defPrice = () => { const o = bike.selectedOptions[0], rate = +o.dataset.rate || 0, p = plan.value;
+    return p === 'q15' ? Math.round(rate / 4) : p === 'q30' ? Math.round(rate / 2) : p === 'h60' ? rate : (+o.dataset.month || ''); };
+  const prev = () => {
+    const p = plan.value, s = start.value ? parseLocal(start.value) : Date.now(), q = Math.max(0, Math.round(numIn(qty.value))), pr = numIn(price.value);
+    const n = p === 'month' ? Math.max(1, q) : q, pe = plannedEnd(p, s, n);
+    $('#rprev').innerHTML = pe ? 'ينتهي الإيجار: <b>' + dtf(pe) + '</b> · الأجرة المتفق عليها: <b>' + fmt(n * pr) + ' ' + CUR + '</b>' : 'مدة مفتوحة: تُحسب الأجرة بحسب الوقت الفعلي عند الاستلام.';
+  };
+  const onPlan = () => { $('#plabel').textContent = (plan.value === 'month' ? 'سعر الشهر' : 'السعر لكل ' + PLANS[plan.value].label) + ' (' + CUR + ') — إدخال يدوي'; $('#qlabel').textContent = PLANS[plan.value].qlabel;
+    qty.placeholder = plan.value === 'month' ? '1' : 'اتركه فارغاً لمدة مفتوحة'; if (plan.value === 'month' && !qty.value) qty.value = '1'; if (!touched) price.value = defPrice(); prev(); };
+  price.addEventListener('input', () => { touched = true; prev(); }); plan.onchange = onPlan; bike.onchange = () => { touched = false; price.value = defPrice(); prev(); };
+  qty.addEventListener('input', prev); start.addEventListener('input', prev); price.value = defPrice(); prev();
+  const cs = $('#cs'), t = () => { $('#newc').style.display = cs.value === '0' ? 'block' : 'none'; }; cs.onchange = t; t();
+}
+
+function receiptText(r) {
+  return [DB.settings.shop_name, 'إيصال #' + r.id, 'المستأجر: ' + cname(r), 'الدراجة: ' + bikeLabel(bikeOf(r.bike_id)), 'نظام الأجرة: ' + planLabel(r) + ' ' + fmt(r.price),
+    'البدء: ' + dtf(r.start), 'الوصول: ' + dtf(r.arrival), 'التأخير: ' + (r.delay_min ? durMin(r.delay_min) + ' (' + fmt(r.delay_cost) + ')' : 'لا يوجد'),
+    'الإجمالي: ' + fmt(r.total) + ' ' + CUR, 'المدفوع: ' + fmt(r.paid), 'المتبقي: ' + fmt(balance(r)) + ' ' + CUR, DB.settings.footer].join('\n');
+}
+function vReceipt(id) {
+  const r = rentalOf(+id); if (!r) { flash('err', 'الإيصال غير موجود'); return null; }
+  const bal = balance(r), c = custOf(r.customer_id), phone = (TMP[r.id] && TMP[r.id].phone) || (c && c.phone) || '', fin = r.status === 'finish���������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������������
