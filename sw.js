@@ -1,5 +1,5 @@
 // يخزّن ملفات التطبيق على الجوال ليعمل بدون إنترنت
-const CACHE = 'bike-rental-v2';
+const CACHE = 'bike-rental-v3';
 const FILES = ['./', './index.html', './manifest.webmanifest', './icon-192.png', './icon-512.png'];
 self.addEventListener('install', e => {
   e.waitUntil(caches.open(CACHE).then(c => c.addAll(FILES)).then(() => self.skipWaiting()));
