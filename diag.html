@@ -1,0 +1,38 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>فحص الاتصال بالاستضافة</title>
+<style>body{font-family:system-ui,Tahoma,sans-serif;margin:0;padding:14px;background:#EDF0F2;color:#17262f;line-height:1.7}
+input,button{width:100%;padding:12px;font-size:16px;margin:6px 0;border-radius:8px;border:1px solid #bbb;box-sizing:border-box}
+button{background:#0B4F6C;color:#fff;border:0}pre{background:#fff;padding:10px;border-radius:8px;white-space:pre-wrap;word-break:break-word}</style></head>
+<body>
+<h3>فحص الاتصال بالاستضافة</h3>
+<div>موقع هذه الصفحة (يجب أن يطابق ALLOWED_ORIGINS حرفاً بحرف):</div>
+<pre id="o"></pre>
+<input id="u" value="https://yahya90.site.je/bike_backup/backup.php" dir="ltr">
+<button id="go">ابدأ الفحص</button>
+<pre id="r">اضغط ابدأ الفحص</pre>
+<script>
+document.getElementById('o').textContent = location.origin;
+const log = t => { document.getElementById('r').textContent += '\n' + t; };
+document.getElementById('go').onclick = async () => {
+  document.getElementById('r').textContent = '';
+  const base = document.getElementById('u').value.trim();
+  const url = base + (base.includes('?') ? '&' : '?') + 'i=1';
+  log('الرابط: ' + url);
+  log(url.startsWith('https://') ? '✓ الرابط https' : '✗ الرابط ليس https');
+  let reach = false;
+  try { await fetch(url, {method: 'POST', mode: 'no-cors', headers: {'Content-Type': 'text/plain'}, body: '{"k":"x","a":"ping"}'}); reach = true; log('1) الوصول للخادم: ✓ وصل الطلب'); }
+  catch (e) { log('1) الوصول للخادم: ✗ فشل (' + e.message + ') → الدومين أو الرابط أو الإنترنت'); }
+  if (!reach) return;
+  try {
+    const r = await fetch(url, {method: 'POST', headers: {'Content-Type': 'text/plain'}, body: '{"k":"x","a":"ping"}'});
+    const t = await r.text();
+    log('2) القراءة من المتصفح: ✓ (الحالة ' + r.status + ')');
+    log('الردّ: ' + t.slice(0, 200));
+    log(t.trim().startsWith('{') ? '→ كل شيء سليم، المشكلة في المفتاح فقط ("المفتاح غير صحيح" أو "لم يُضبط" ردّ طبيعي هنا).' : '→ الردّ ليس JSON: غالباً حماية InfinityFree.');
+  } catch (e) {
+    log('2) القراءة من المتصفح: ✗ محجوبة (' + e.message + ')');
+    log('→ الخادم يعمل لكن الردّ لا يحمل إذن CORS. السبب: ALLOWED_ORIGINS لا يطابق الموقع أعلاه، أو حماية InfinityFree تردّ بصفحة فحص، أو فراغ قبل <?php.');
+  }
+};
+</script></body></html>
