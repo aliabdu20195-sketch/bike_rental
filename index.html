@@ -261,6 +261,9 @@ function calcRental(r, arr) {
       const d = elapsed - r.qty * u;
       if (d > grace) { delayMin = Math.floor(d); delayCost = (S.late_mode === 'unit' ? Math.ceil(d / du - 1e-9) : d / du) * dp * (1 + late / 100); base = flat ? r.price : r.qty * r.price; units = r.qty; }
       else { units = S.early_mode === 'agreed' ? r.qty : Math.min(r.qty, actual); base = flat ? r.price : units * r.price; }
+    } else if (S.late_mode !== 'unit' && !flat) { /* مدة مفتوحة بالدقيقة: وحدات كاملة + الباقي بالنسبة، والحد الأدنى وحدة */
+      const full = Math.floor(elapsed / u + 1e-9), rem = elapsed - full * u; units = Math.max(1, full);
+      base = full === 0 ? r.price : full * r.price + (rem > grace ? rem / u * r.price : 0);
     } else { units = actual; base = flat ? r.price : actual * r.price; }
   }
   base = Math.round(base); delayCost = Math.round(delayCost);
@@ -996,7 +999,7 @@ function vSettings() {
     '<h2>احتساب الوقت والتأخير</h2><div class="row c2"><div><label>دقائق السماح</label><input name="grace" inputmode="numeric" value="' + s.grace + '"><div class="hint">لا تُحسب وحدة جديدة ولا تأخير إن كان الزائد أقل من هذه الدقائق.</div></div>' +
     '<div><label>زيادة التأخير (%)</label><input name="late_pct" inputmode="decimal" value="' + s.late_pct + '"><div class="hint">0 = التأخير بنفس سعر الوحدة. 50 = أغلى بنسبة 50%.</div></div>' +
     '<div><label>تقريب المبلغ لأقرب (' + CUR + ')</label><input name="round_to" inputmode="numeric" value="' + s.round_to + '"></div>' +
-    '<div><label>احتساب التأخير</label><select name="late_mode"><option value="minute"' + (s.late_mode !== 'unit' ? ' selected' : '') + '>بالدقيقة (70 دقيقة = ساعة وعُشر)</option><option value="unit"' + (s.late_mode === 'unit' ? ' selected' : '') + '>بوحدة كاملة (أي تأخير = وحدة)</option></select><div class="hint">بالدقيقة: ساعة بـ400 وتأخر 10 دقائق = 400 + 67. دقائق السماح تُعفي من التأخير القصير.</div></div>' +
+    '<div><label>احتساب الوقت الزائد</label><select name="late_mode"><option value="minute"' + (s.late_mode !== 'unit' ? ' selected' : '') + '>بالدقيقة (70 دقيقة = ساعة وعُشر)</option><option value="unit"' + (s.late_mode === 'unit' ? ' selected' : '') + '>بوحدة كاملة (أي تأخير = وحدة)</option></select><div class="hint">بالدقيقة (يشمل التأخير والإيجار المفتوح): ساعة بـ400 و70 دقيقة = 467. دقائق السماح تُعفي من الزيادة القصيرة.</div></div>' +
     '<div><label>الإرجاع قبل الموعد</label><select name="early_mode"><option value="actual"' + (s.early_mode === 'actual' ? ' selected' : '') + '>احتساب الوقت الفعلي</option><option value="agreed"' + (s.early_mode === 'agreed' ? ' selected' : '') + '>احتساب المدة المتفق عليها كاملة</option></select></div></div>' +
     '<h2>خصوصية العملاء</h2><label style="display:flex;gap:8px;align-items:center"><input type="checkbox" name="auto_delete"' + (s.auto_delete ? ' checked' : '') + '> حذف بيانات العميل عند إنهاء إيجاره (مفعّل في صفحة الاستلام)</label><div class="hint">مطفأ افتراضياً لأن النظام يحتفظ بسجل العملاء.</div>' +
     '<h2>شروط عقد الإيجار</h2><textarea name="contract_terms" rows="7">' + esc(s.contract_terms || TERMS) + '</textarea><div class="hint">تُطبع في عقد الإيجار، كل سطر بند.</div>' +
