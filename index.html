@@ -115,6 +115,7 @@ const PLANS = {
   week: {label: 'أسبوع', unit: 10080, qlabel: 'عدد الأسابيع (اختياري)'},
   month: {label: 'اشتراك شهري', unit: 0, qlabel: 'عدد الأشهر (اتركه فارغاً لمدة مفتوحة)'},
   flat: {label: 'سعر مقطوع', unit: 1440, qlabel: 'عدد الأيام المتفق عليها'},
+  custom: {label: 'مدة وسعر يدوي', unit: 1, qlabel: 'المدة بالدقائق (مثال: 10)'},
 };
 const TERMS = "1) يقرّ المستأجر باستلام الدراجة سليمة وبالحالة الموضحة، ويلتزم بإعادتها بنفس الحالة.\n2) المستأجر مسؤول عن أي ضرر أو فقدان أو مخالفات مرورية أثناء مدة الإيجار.\n3) يُمنع تأجير الدراجة لشخص آخر أو استخدامها خارج النظام العام.\n4) التأخير عن موعد الإرجاع يُحتسب بسعر الإيجار المتفق عليه.\n5) يُسترد التأمين عند تسليم الدراجة سليمة، ويُخصم منه قيمة أي ضرر.";
 const DEF = {shop_name: 'محلات تأجير الدراجات', shop_phone: '', footer: 'شكراً لزيارتكم', default_rate: 300, grace: 0, round_to: 1,
@@ -203,7 +204,7 @@ const activeRentals = () => DB.rentals.filter(r => r.status === 'active').sort((
 const cname = r => (TMP[r.id] && TMP[r.id].name) || (custOf(r.customer_id) && custOf(r.customer_id).name) || 'عميل محذوف';
 const balance = r => r.status !== 'finished' ? 0 : Math.max(0, r.total - Math.min(r.deposit, r.total) - r.paid);
 const bikeLabel = b => b ? (b.name + (b.serial ? ' · ' + b.serial : '')) : 'دراجة محذوفة';
-const planLabel = r => PLANS[r.plan].label;
+const planLabel = r => r.plan === 'custom' ? 'مخصص ' + r.unit_min + ' د' : PLANS[r.plan].label;
 const openMaint = bid => DB.maint.some(m => m.bike_id === bid && m.status === 'open');
 const initial = s => (String(s || '?').trim()[0] || '?');
 const bikeAvatar = (b, lg) => (b && PHOTOS['b' + b.id]) ? '<img class="avatar bike' + (lg ? ' lg' : '') + '" src="' + PHOTOS['b' + b.id] + '" alt="">' : '<span class="avatar bike' + (lg ? ' lg' : '') + '">🏍</span>';
@@ -214,7 +215,7 @@ function priceFor(b, plan) {
   return plan === 'q15' ? (b.rate15 || Math.round(rate / 4)) : plan === 'q30' ? (b.rate30 || Math.round(rate / 2)) : plan === 'h60' ? rate :
     plan === 'day' ? day : plan === 'week' ? (b.rate_week || day * 7) : plan === 'month' ? (b.month_price || day * 30) : 0;
 }
-function planDesc(r) { return r.plan === 'flat' ? 'سعر مقطوع ' + fmt(r.price) + ' لمدة ' + r.qty + ' يوم' : PLANS[r.plan].label + ' · ' + fmt(r.price) + (r.qty ? ' × ' + r.qty : ''); }
+function planDesc(r) { return r.plan === 'custom' ? fmt(r.price) + ' لمدة ' + r.unit_min + ' دقيقة' : r.plan === 'flat' ? 'سعر مقطوع ' + fmt(r.price) + ' لمدة ' + r.qty + ' يوم' : PLANS[r.plan].label + ' · ' + fmt(r.price) + (r.qty ? ' × ' + r.qty : ''); }
 const avatar = (c, lg) => (c && PHOTOS[c.id]) ? '<img class="avatar' + (lg ? ' lg' : '') + '" src="' + PHOTOS[c.id] + '" alt="">' : '<span class="avatar' + (lg ? ' lg' : '') + '">' + esc(initial(c && c.name)) + '</span>';
 
 /* ====================== الصندوق (دفتر الحركات) ====================== */
@@ -304,6 +305,8 @@ function startRental(f) {
   const start = f.start ? parseLocal(f.start) : Date.now();
   if (isNaN(start) || start > Date.now() + 60000) return fail('وقت البداية غير صحيح أو في المستقبل');
   let qty = Math.max(0, Math.round(numIn(f.qty))); if (plan === 'flat' && qty < 1) return fail('أدخل عدد الأيام للسعر المقطوع');
+  if (plan === 'custom' && qty < 1) return fail('أدخل مدة الإيجار بالدقائق');
+  const cust = plan === 'custom', mins = qty; if (cust) qty = 1;
   let cid = +f.customer_id || 0;
   if (!cid) {
     const name = (f.c_name || '').trim(); if (!name) return fail('اختر عميلاً أو أدخل اسم عميل جديد');
@@ -315,7 +318,7 @@ function startRental(f) {
   const cuX = custOf(cid);
   if (cuX && cuX.blocked) return fail('هذا العميل محظور' + (cuX.block_reason ? ': ' + cuX.block_reason : '') + '. يرفع المدير الحظر أولاً.');
   const rid = nid('rent'), deposit = numIn(f.deposit);
-  DB.rentals.push({id: rid, bike_id: bike.id, customer_id: cid, plan, unit_min: PLANS[plan].unit, price, qty, start, planned_end: plannedEnd(plan, start, qty),
+  DB.rentals.push({id: rid, bike_id: bike.id, customer_id: cid, plan, unit_min: cust ? mins : PLANS[plan].unit, price, qty, start, planned_end: cust ? start + mins * 60000 : plannedEnd(plan, start, qty),
     arrival: null, delay_min: 0, delay_cost: 0, base: 0, deposit, deposit_note: (f.deposit_note || '').trim(), discount: 0, total: 0, paid: 0, refund: 0,
     status: 'active', notes: (f.notes || '').trim(), by: who()});
   if (deposit > 0) cashAdd('adv', deposit, rid, '', 'عربون إيجار #' + rid, start > Date.now() - 36e5 ? Date.now() : start);
@@ -739,10 +742,10 @@ function bindRent() {
   const prev = () => {
     const p = plan.value, s = start.value ? parseLocal(start.value) : Date.now(), q = Math.max(0, Math.round(numIn(qty.value))), pr = numIn(price.value);
     const n = q, pe = plannedEnd(p, s, n);
-    $('#rprev').innerHTML = pe ? 'ينتهي الإيجار: <b>' + dtf(pe) + '</b> · الأجرة المتفق عليها: <b>' + fmt(p === 'flat' ? pr : n * pr) + ' ' + CUR + '</b>' : p === 'month' ? 'اشتراك شهري مفتوح: تُحسب الأشهر الكاملة + الأيام الزائدة (سعر الشهر ÷ 30) عند الاستلام.' : 'مدة مفتوحة: تُحسب الأجرة بحسب الوقت الفعلي عند الاستلام.';
+    $('#rprev').innerHTML = pe ? 'ينتهي الإيجار: <b>' + dtf(pe) + '</b> · الأجرة المتفق عليها: <b>' + fmt(p === 'flat' || p === 'custom' ? pr : n * pr) + ' ' + CUR + '</b>' : p === 'month' ? 'اشتراك شهري مفتوح: تُحسب الأشهر الكاملة + الأيام الزائدة (سعر الشهر ÷ 30) عند الاستلام.' : 'مدة مفتوحة: تُحسب الأجرة بحسب الوقت الفعلي عند الاستلام.';
   };
-  const onPlan = () => { $('#plabel').textContent = (plan.value === 'month' ? 'سعر الشهر' : plan.value === 'flat' ? 'المبلغ المقطوع الإجمالي' : 'السعر لكل ' + PLANS[plan.value].label) + ' (' + CUR + ') — إدخال يدوي'; $('#qlabel').textContent = PLANS[plan.value].qlabel;
-    qty.placeholder = plan.value === 'flat' ? 'عدد الأيام' : 'اتركه فارغاً لمدة مفتوحة'; if (!touched) price.value = defPrice(); prev(); };
+  const onPlan = () => { $('#plabel').textContent = (plan.value === 'month' ? 'سعر الشهر' : plan.value === 'flat' ? 'المبلغ المقطوع الإجمالي' : plan.value === 'custom' ? 'السعر الإجمالي للمدة' : 'السعر لكل ' + PLANS[plan.value].label) + ' (' + CUR + ') — إدخال يدوي'; $('#qlabel').textContent = PLANS[plan.value].qlabel;
+    qty.placeholder = plan.value === 'custom' ? 'مثال: 10' : plan.value === 'flat' ? 'عدد الأيام' : 'اتركه فارغاً لمدة مفتوحة'; if (!touched) price.value = defPrice(); prev(); };
   price.addEventListener('input', () => { touched = true; prev(); }); plan.onchange = onPlan; bike.onchange = () => { touched = false; price.value = defPrice(); showImg(); prev(); };
   qty.addEventListener('input', prev); start.addEventListener('input', prev); price.value = defPrice(); showImg(); prev();
   const cs = $('#cs'), t = () => { $('#newc').style.display = cs.value === '0' ? 'block' : 'none'; }; cs.onchange = t; t();
@@ -1069,7 +1072,7 @@ function tick() {
     const r = rentalOf(+el.dataset.id); if (!r || r.status !== 'active') return;
     el.querySelector('.clock').textContent = dur((now - r.start) / 1000); const cc = calcRental(r, now); el.querySelector('.live-amt').textContent = fmt(cc.total);
     const rem = el.querySelector('.rem');
-    if (r.planned_end) { const left = (r.planned_end - now) / 1000; if (left >= 0) { rem.textContent = 'متبقي ' + shortDur(left); el.classList.remove('late'); } else { rem.textContent = 'متأخر ' + shortDur(-left) + (cc.delayCost ? ' · تكلفة التأخير +' + fmt(cc.delayCost) : (+DB.settings.grace ? ' · ضمن السماح (' + DB.settings.grace + ' د)' : '')); el.classList.add('late'); } }
+    if (r.planned_end) { const left = (r.planned_end - now) / 1000; if (left >= 0) { rem.textContent = 'متبقي ' + shortDur(left); el.classList.remove('late'); } else { rem.textContent = 'متأخر ' + shortDur(-left) + (cc.delayCost ? ' · زيادة +' + fmt(cc.delayCost) + ' فوق ' + fmt(cc.base) : (+DB.settings.grace ? ' · ضمن السماح (' + DB.settings.grace + ' د)' : '')); el.classList.add('late'); } }
     else rem.textContent = 'مدة مفتوحة';
   });
 }
